@@ -1,9 +1,11 @@
-
+require "nokogiri"
+require "base64"
+require "net/http"
 
 def pagelime_environment_configured?
   ENV['PAGELIME_ACCOUNT_KEY'] != nil &&
   ENV['PAGELIME_ACCOUNT_SECRET'] != nil &&
-  ENV['PAGELIME_HEROKU_API_VERSION']
+  ENV['PAGELIME_RACK_API_VERSION']
 end
 
 def cms_api_signature(req)
@@ -13,23 +15,22 @@ def cms_api_signature(req)
 end
 
 def fetch_cms_shared_xml
-  xml_content = Rails.cache.fetch("cms:shared", :expires_in => 1.year) do
-    puts "PAGELIME CMS PLUGIN: NO SHARED CACHE... loading xml"
-    # set input values
-    key = ENV['PAGELIME_ACCOUNT_KEY']
-    
-    # get the url that we need to post to
-    http = Net::HTTP::new('s3.amazonaws.com',80)
-    
-    # send the request
-    response = http.get("/cms_assets/heroku/#{key}/shared-regions.xml")
-    
-    # puts "PAGELIME CMS PLUGIN: response XML: #{response.body}"
-    
-    xml_content = response.body
-    
-    xml_content
-  end
+
+  puts "PAGELIME CMS PLUGIN: NO SHARED CACHE... loading xml"
+  # set input values
+  key = ENV['PAGELIME_ACCOUNT_KEY']
+  
+  # get the url that we need to post to
+  http = Net::HTTP::new('s3.amazonaws.com',80)
+  
+  # send the request
+  response = http.get("/cms_assets/heroku/#{key}/shared-regions.xml")
+  
+  # puts "PAGELIME CMS PLUGIN: response XML: #{response.body}"
+  
+  xml_content = response.body
+  
+  xml_content
   
   return xml_content
   
@@ -38,22 +39,21 @@ end
 def fetch_cms_xml(page_path, element_ids)
 
   page_key = Base64.encode64(page_path)
-  xml_content = Rails.cache.fetch("cms:#{page_key}", :expires_in => 1.year) do
-    puts "PAGELIME CMS PLUGIN: NO '#{page_path}' CACHE... loading xml"
-    # set input values
-    key = ENV['PAGELIME_ACCOUNT_KEY']
-    
-    # get the url that we need to post to
-    http = Net::HTTP::new('s3.amazonaws.com',80)
-    
-    response = http.get("/cms_assets/heroku/#{key}/pages#{page_path}.xml")
-    
-    # puts "PAGELIME CMS PLUGIN: response XML: #{response.body}"
-    
-    xml_content = response.body
-    
-    xml_content
-  end
+
+  puts "PAGELIME CMS PLUGIN: NO '#{page_path}' CACHE... loading xml"
+  # set input values
+  key = ENV['PAGELIME_ACCOUNT_KEY']
+  
+  # get the url that we need to post to
+  http = Net::HTTP::new('s3.amazonaws.com',80)
+  
+  response = http.get("/cms_assets/heroku/#{key}/pages#{page_path}.xml")
+  
+  # puts "PAGELIME CMS PLUGIN: response XML: #{response.body}"
+  
+  xml_content = response.body
+  
+  xml_content
   
   return xml_content
   
