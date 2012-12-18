@@ -16,6 +16,8 @@ end
 
 def fetch_cms_shared_xml
 
+  # TODO: check cache (see the rails plugin for info)
+
   if (@opts[:log] == "verbose") 
     puts "PAGELIME CMS PLUGIN: NO SHARED CACHE... loading xml"
   end
@@ -43,6 +45,7 @@ def fetch_cms_xml(page_path, element_ids)
 
   page_key = Base64.encode64(page_path)
 
+  # TODO: check cache (see the rails plugin for info)
 
   if (@opts[:log] == "verbose") 
     puts "PAGELIME CMS PLUGIN: NO '#{page_path}' CACHE... loading xml"
@@ -55,8 +58,6 @@ def fetch_cms_xml(page_path, element_ids)
   http = Net::HTTP::new('s3.amazonaws.com',80)
   
   response = http.get("/cms_assets/heroku/#{key}/pages#{page_path}.xml")
-  
-  # puts "PAGELIME CMS PLUGIN: response XML: #{response.body}"
   
   xml_content = response.body
   
