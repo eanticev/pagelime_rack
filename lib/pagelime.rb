@@ -16,7 +16,10 @@ end
 
 def fetch_cms_shared_xml
 
-  puts "PAGELIME CMS PLUGIN: NO SHARED CACHE... loading xml"
+  if (@opts[:log] == "verbose") 
+    puts "PAGELIME CMS PLUGIN: NO SHARED CACHE... loading xml"
+  end
+
   # set input values
   key = ENV['PAGELIME_ACCOUNT_KEY']
   
@@ -40,7 +43,11 @@ def fetch_cms_xml(page_path, element_ids)
 
   page_key = Base64.encode64(page_path)
 
-  puts "PAGELIME CMS PLUGIN: NO '#{page_path}' CACHE... loading xml"
+
+  if (@opts[:log] == "verbose") 
+    puts "PAGELIME CMS PLUGIN: NO '#{page_path}' CACHE... loading xml"
+  end
+  
   # set input values
   key = ENV['PAGELIME_ACCOUNT_KEY']
   
@@ -66,16 +73,29 @@ def cms_process_html_block_regions(editable_regions, xml_content)
     # Grab client ID
     client_id = div["id"]
     
-    puts "PAGELIME CMS PLUGIN: parsing xml"
+    if (@opts[:log] == "verbose") 
+      puts "PAGELIME CMS PLUGIN: parsing xml"
+    end
+
     soap = Nokogiri::XML::Document.parse(xml_content)
-    puts "PAGELIME CMS PLUGIN: looking for region: #{client_id}"
+    
+    if (@opts[:log] == "verbose") 
+      puts "PAGELIME CMS PLUGIN: looking for region: #{client_id}"
+    end
+
     xpathNodes = soap.css("EditableRegion[@ElementID=\"#{client_id}\"]")
-    puts "regions found: #{xpathNodes.count}"
+    
+    if (@opts[:log] == "verbose") 
+      puts "regions found: #{xpathNodes.count}"
+    end
+
     if (xpathNodes.count > 0)
       new_content = xpathNodes[0].css("Html")[0].content()
       
-      puts "PAGELIME CMS PLUGIN: NEW CONTENT:"
-      puts new_content
+      if (@opts[:log] == "verbose") 
+        puts "PAGELIME CMS PLUGIN: NEW CONTENT:"
+        puts new_content
+      end
       
       if (new_content)
         # div.content = "Replaced content"
