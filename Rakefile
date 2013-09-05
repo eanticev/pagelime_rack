@@ -19,7 +19,7 @@ Jeweler::Tasks.new do |gem|
   gem.license = "MIT"
   gem.summary = "Rack Middleware for integrating Pagelime into ruby frameworks"
   gem.description = "The Pagelime Rack Middleware will process outgoing HTML, look for editable areas, and replace the content with the appropriate HTML from the Pagelime CDN and cache it in memory if possible."
-  gem.email = "eanticev@gmail.com"
+  gem.email = "emil@pagelime.com"
   gem.authors = ["Emil Anticevic", "Joel Van Horn"]
   # dependencies defined in Gemfile
 end
