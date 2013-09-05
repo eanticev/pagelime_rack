@@ -1,7 +1,7 @@
 Pagelime Rack Plugin
 =====================
 
-Easily add the Pagelime CMS to your rack app.
+Easily add the Pagelime CMS to your Rack app.
 
 Pagelime is a simple CMS service that allows you to define editable regions in your content without installing any software on your site or app. 
 Simply add a `class="cms-editable"` to any HTML element, and log-in to the Pagelime CMS service to edit your content and images with a nice UI. 
@@ -19,10 +19,10 @@ Getting Started
 
 ### Requirements
 
-* Pagelime account (either a standalone from pagelime.com or as a Heroku add-on)
+* Pagelime account (either standalone [pagelime.com](http://pagelime.com) or via the [Pagelime Heroku add-on](https://addons.heroku.com/pagelime))
 * Nokogiri gem
 
-### Step 1: Install the Pagelime gem
+### Step 1: Install the Pagelime Rack gem
 
 Edit your `Gemfile` and add
 
@@ -32,7 +32,14 @@ then run
 
     bundle install
 
-### Step 2: Configure your application
+### Step 2: Setup your Pagelime credentials
+
+*(Skip if using Heroku add-on)*
+
+If you are NOT using the [Pagelime Heroku add-on](https://addons.heroku.com/pagelime), set up an account at [pagelime.com](http://pagelime.com). 
+Make sure that the "Integration Method" for your site on the advanced tab is set to "web services".
+
+### Step 3: Configure your application
 
 Set up your Environment variables: *(Skip if using Heroku add-on)*
 
@@ -48,7 +55,7 @@ Alternatively, configure them explicitly:
       config.api_version = "1.0"
     end
 
-### Step 3: Make pages editable
+### Step 4: Make pages editable
 
 Create some editable regions in your views like so:
 
@@ -78,3 +85,4 @@ Sinatra Sample
     end
 
 Copyright (c) 2013 Pagelime LLC, released under the MIT license
+
