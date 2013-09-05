@@ -1,70 +1,72 @@
 require "nokogiri"
 
 module Pagelime
-  class HtmlProcessor
+  class XmlProcessor
     
     attr_reader :client
+    attr_reader :format
     
     def initialize(client)
       @client = client
+      @format = :xml
     end
     
     def process_document(html, page_path = false)
       doc = Nokogiri::HTML::Document.parse(html)
       
-      cms_process_html_block(doc, page_path)
+      # return original HTML if nil returned
+      parse_document(doc, page_path) || html
     end
     
     def process_fragment(html, page_path = false)
       doc = Nokogiri::HTML::DocumentFragment.parse(html)
       
-      cms_process_html_block(doc, page_path)
+      # return original HTML if nil returned
+      parse_document(doc, page_path) || html
     end
     
+    private
+    
     # options = { :page_path => nil, :html => "", :fragment => true }
-    def cms_process_html_block(doc, page_path = false)
+    def parse_document(doc, page_path = false)
       
       unless client.configured?
-        puts "PAGELIME CMS PLUGIN: Environment variables not configured"
-        return html
+        ::Pagelime.logger.warn "PAGELIME CMS PLUGIN: Environment variables not configured"
+        return nil
       end
     
       # use nokogiri to replace contents
       editable_regions  = doc.css(".cms-editable")
       shared_regions    = doc.css(".cms-shared")
-      region_client_ids = editable_regions.map{|div| div["id"]}
       
-      cms_process_html_block_regions editable_regions, client.fetch_cms_xml(page_path, region_client_ids)
-      cms_process_html_block_regions shared_regions, client.fetch_cms_shared_xml
+      patch_regions editable_regions, client.fetch(page_path, format)
+      patch_regions shared_regions, client.fetch_shared(format)
         
       return doc.to_html
       
     end
     
-    def cms_process_html_block_regions(editable_regions, xml_content)
+    def patch_regions(editable_regions, xml_content)
+    
+      ::Pagelime.logger.debug "PAGELIME CMS PLUGIN: parsing xml"
     
       editable_regions.each do |div| 
       
         # Grab client ID
         client_id = div["id"]
-        
-        ::Pagelime.logger.debug "PAGELIME CMS PLUGIN: parsing xml"
-    
-        soap = Nokogiri::XML::Document.parse(xml_content)
+        soap      = Nokogiri::XML::Document.parse(xml_content)
+        nodes     = soap.css("EditableRegion[@ElementID=\"#{client_id}\"]")
         
         ::Pagelime.logger.debug "PAGELIME CMS PLUGIN: looking for region: #{client_id}"
+        ::Pagelime.logger.debug "regions found: #{nodes.count}"
     
-        xpathNodes = soap.css("EditableRegion[@ElementID=\"#{client_id}\"]")
-        
-        ::Pagelime.logger.debug "regions found: #{xpathNodes.count}"
-    
-        if (xpathNodes.count > 0)
-          new_content = xpathNodes[0].css("Html")[0].content()
+        if nodes.any?
+          new_content = nodes[0].css("Html")[0].content
           
           ::Pagelime.logger.debug "PAGELIME CMS PLUGIN: NEW CONTENT:"
           ::Pagelime.logger.debug new_content
           
-          if (new_content)
+          if new_content
             # div.content = "Replaced content"
             div.replace new_content
           end
