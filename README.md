@@ -65,6 +65,19 @@ Create some editable regions in your views like so:
 
 *The ID and the class are required for the CMS to work*
 
+### Step 5: Edit your pages!
+
+#### For Heroku users
+
+If you're using the Pagelime Heroku add-on, go to the Heroku admin for your app and under the "Resources" tab you will see the Pagelime add-on listed. 
+Click on the add-on name and you will be redirected to the Pagelime CMS editor. 
+From there you can edit any page in your Rack app!
+
+#### For Pagelime.com users
+
+If you have a standalone Pagelime account, simply go to [pagelime.com](http://pagelime.com) and edit your site as usual (see Step 2). 
+
+
 Sinatra Sample
 --------------
 
