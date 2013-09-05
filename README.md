@@ -40,6 +40,8 @@ Set up your Environment variables:
     ENV['PAGELIME_ACCOUNT_SECRET'] = "..."
     ENV['PAGELIME_RACK_API_VERSION'] = "1.0"
 
+*Skip if using Heroku add-on*
+
 Alternatively, configure them explicitly:
 
     Pagelime.configure do |config|
