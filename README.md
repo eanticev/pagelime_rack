@@ -34,13 +34,11 @@ then run
 
 ### Step 2: Configure your application
 
-Set up your Environment variables:
+Set up your Environment variables: *(Skip if using Heroku add-on)*
 
     ENV['PAGELIME_ACCOUNT_KEY'] = "..."
     ENV['PAGELIME_ACCOUNT_SECRET'] = "..."
     ENV['PAGELIME_RACK_API_VERSION'] = "1.0"
-
-*Skip if using Heroku add-on*
 
 Alternatively, configure them explicitly:
 
