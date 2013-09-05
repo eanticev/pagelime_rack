@@ -4,16 +4,15 @@ require "net/http"
 module Pagelime
   class Client
     
-    attr_accessor :account_key, :account_secret, :api_version
+    attr_accessor :config
     
-    def initialize(account_key, account_secret, api_version)
-      @account_key    = account_key
-      @account_secret = account_secret
-      @api_version    = api_version
+    def initialize(config)
+      # reference config object to ensure we have the latest credentials, etc
+      @config = config
     end
     
     def configured?
-      !(account_key.nil? || account_secret.nil? || api_version.nil?)
+      !(config.account_key.nil? || config.account_secret.nil? || config.api_version.nil?)
     end
     
     # def cms_api_signature(req)
@@ -30,7 +29,7 @@ module Pagelime
       
       # get the url that we need to post to
       http        = Net::HTTP::new('s3.amazonaws.com', 80)
-      response    = http.get("/cms_assets/heroku/#{account_key}/shared-regions.xml")
+      response    = http.get("/cms_assets/heroku/#{config.account_key}/shared-regions.xml")
       xml_content = response.body
       
       # puts "PAGELIME CMS PLUGIN: response XML: #{xml_content}"
@@ -51,7 +50,7 @@ module Pagelime
       
       # get the url that we need to post to
       http        = Net::HTTP::new('s3.amazonaws.com', 80)
-      response    = http.get("/cms_assets/heroku/#{account_key}/pages#{page_path}.xml")
+      response    = http.get("/cms_assets/heroku/#{config.account_key}/pages#{page_path}.xml")
       xml_content = response.body
       
       xml_content
