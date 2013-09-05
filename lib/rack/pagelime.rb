@@ -11,16 +11,16 @@ module Rack
       @app      = app
       @options  = options
       
-      ::Pagelime.logger.debug  "PAGELIME: Rack Plugin Initialized"
+      ::Pagelime.logger.debug  "PAGELIME CMS RACK PLUGIN: Rack Plugin Initialized"
     end 
 
     def call(env)
 
       status, headers, response = @app.call(env)
 
-      ::Pagelime.logger.debug  "PAGELIME: Headers: #{headers}"
-      ::Pagelime.logger.debug  "PAGELIME: Status: #{status}"
-      ::Pagelime.logger.debug  "PAGELIME: Response: #{response}"
+      ::Pagelime.logger.debug  "PAGELIME CMS RACK PLUGIN: Headers: #{headers}"
+      ::Pagelime.logger.debug  "PAGELIME CMS RACK PLUGIN: Status: #{status}"
+      ::Pagelime.logger.debug  "PAGELIME CMS RACK PLUGIN: Response: #{response}"
 
       if status == 200 && headers["content-type"].include?("text/html")
           
@@ -29,8 +29,8 @@ module Rack
     
         req = Rack::Request.new(env)
 
-        ::Pagelime.logger.debug  "PAGELIME: Processing For Path: #{req.path}"
-        ::Pagelime.logger.debug  "PAGELIME: Processing Body (size:#{body_content.length})"
+        ::Pagelime.logger.debug  "PAGELIME CMS RACK PLUGIN: Processing For Path: #{req.path}"
+        ::Pagelime.logger.debug  "PAGELIME CMS RACK PLUGIN: Processing Body (size:#{body_content.length})"
       
         body = ::Pagelime.html_processor.process_document(body_content, req.path)
 
@@ -40,7 +40,7 @@ module Rack
 
       else
 
-        ::Pagelime.logger.debug  "PAGELIME: Not touching this request"
+        ::Pagelime.logger.debug  "PAGELIME CMS RACK PLUGIN: Not touching this request"
 
         return [status, headers, response]
 

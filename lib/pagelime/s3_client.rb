@@ -37,11 +37,13 @@ module Pagelime
     
       # TODO: check cache (see the rails plugin for info)
     
-      ::Pagelime.logger.debug "PAGELIME CMS PLUGIN: NO SHARED CACHE... loading #{format}"
+      ::Pagelime.logger.debug "PAGELIME CMS RACK PLUGIN: NO SHARED CACHE... loading #{format}"
       
       content = request_content("/cms_assets/heroku/#{account_key}/shared-regions.#{format}")
       
-      # puts "PAGELIME CMS PLUGIN: response XML: #{xml_content}"
+      # ::Pagelime.logger.debug "PAGELIME CMS RACK PLUGIN: shared XML: #{content}"
+      
+      Pagelime.logger.debug "PAGELIME CMS RACK PLUGIN: Shared content: #{content.inspect}"
       
       content
     end
@@ -55,25 +57,32 @@ module Pagelime
     
       # TODO: check cache (see the rails plugin for info)
     
-      Pagelime.logger.debug "PAGELIME CMS PLUGIN: NO '#{page_path}' CACHE... loading #{format}"
+      Pagelime.logger.debug "PAGELIME CMS RACK PLUGIN: NO '#{page_path}' CACHE... loading #{format}"
       
       content = request_content("/cms_assets/heroku/#{account_key}/pages#{page_path}.#{format}")
+      
+      Pagelime.logger.debug "PAGELIME CMS RACK PLUGIN: Content: #{content.inspect}"
       
       content
     end
     
     def clear(page_path, format = self.class.default_format)
-      Pagelime.logger.warn "#{self.class.name}##{__method__} is not implemented!"
+      Pagelime.logger.warn "PAGELIME CMS RACK PLUGIN: #{self.class.name}##{__method__} is not implemented!"
     end
     
     def clear_shared(format = self.class.default_format)
-      Pagelime.logger.warn "#{self.class.name}##{__method__} is not implemented!"
+      Pagelime.logger.warn "PAGELIME CMS RACK PLUGIN: #{self.class.name}##{__method__} is not implemented!"
     end
     
     private
     
     def request_content(url)
-      http.get(url).body
+      response = http.get(url)
+      
+      Pagelime.logger.debug "PAGELIME CMS RACK PLUGIN: S3 response code: #{response.code.inspect}"
+      
+      # only return the body if response code 200-399
+      response.body if (200...400).include?(response.code)
     end
     
     def http

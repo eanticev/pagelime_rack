@@ -12,17 +12,37 @@ module Pagelime
     end
     
     def process_document(html, page_path = false)
+      Pagelime.logger.debug "PAGELIME CMS RACK PLUGIN: Document HTML: #{html.inspect}"
+      
       doc = Nokogiri::HTML::Document.parse(html)
       
       # return original HTML if nil returned
-      parse_document(doc, page_path) || html
+      output = parse_document(doc, page_path) || html
+      
+      if html == output
+        Pagelime.logger.debug "PAGELIME CMS RACK PLUGIN: Document output: UNCHANGED!"
+      else
+        Pagelime.logger.debug "PAGELIME CMS RACK PLUGIN: Document output: #{output.inspect}"
+      end
+      
+      output
     end
     
     def process_fragment(html, page_path = false)
+      Pagelime.logger.debug "PAGELIME CMS RACK PLUGIN: Fragment HTML: #{html.inspect}"
+      
       doc = Nokogiri::HTML::DocumentFragment.parse(html)
       
       # return original HTML if nil returned
-      parse_document(doc, page_path) || html
+      output = parse_document(doc, page_path) || html
+      
+      if html == output
+        Pagelime.logger.debug "PAGELIME CMS RACK PLUGIN: Fragment output: UNCHANGED!"
+      else
+        Pagelime.logger.debug "PAGELIME CMS RACK PLUGIN: Fragment output: #{output.inspect}"
+      end
+      
+      output
     end
     
     private
@@ -31,7 +51,7 @@ module Pagelime
     def parse_document(doc, page_path = false)
       
       unless client.configured?
-        ::Pagelime.logger.warn "PAGELIME CMS PLUGIN: Environment variables not configured"
+        ::Pagelime.logger.warn "PAGELIME CMS RACK PLUGIN: Environment variables not configured"
         return nil
       end
     
@@ -48,7 +68,7 @@ module Pagelime
     
     def patch_regions(editable_regions, xml_content)
     
-      ::Pagelime.logger.debug "PAGELIME CMS PLUGIN: parsing xml"
+      ::Pagelime.logger.debug "PAGELIME CMS RACK PLUGIN: parsing xml"
     
       editable_regions.each do |div| 
       
@@ -57,14 +77,13 @@ module Pagelime
         soap      = Nokogiri::XML::Document.parse(xml_content)
         nodes     = soap.css("EditableRegion[@ElementID=\"#{client_id}\"]")
         
-        ::Pagelime.logger.debug "PAGELIME CMS PLUGIN: looking for region: #{client_id}"
-        ::Pagelime.logger.debug "regions found: #{nodes.count}"
+        ::Pagelime.logger.debug "PAGELIME CMS RACK PLUGIN: looking for region: #{client_id}"
+        ::Pagelime.logger.debug "PAGELIME CMS RACK PLUGIN: regions found: #{nodes.count}"
     
         if nodes.any?
           new_content = nodes[0].css("Html")[0].content
           
-          ::Pagelime.logger.debug "PAGELIME CMS PLUGIN: NEW CONTENT:"
-          ::Pagelime.logger.debug new_content
+          ::Pagelime.logger.debug "PAGELIME CMS RACK PLUGIN: NEW CONTENT: #{new_content.inspect}"
           
           if new_content
             # div.content = "Replaced content"
