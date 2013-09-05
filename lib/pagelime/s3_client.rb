@@ -82,7 +82,7 @@ module Pagelime
       Pagelime.logger.debug "PAGELIME CMS RACK PLUGIN: S3 response code: #{response.code.inspect}"
       
       # only return the body if response code 200-399
-      response.body if (200...400).include?(response.code)
+      response.body if (200...400).include?(response.code.to_f)
     end
     
     def http
