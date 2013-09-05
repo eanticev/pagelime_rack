@@ -1,3 +1,6 @@
+require "base64"
+require "net/http"
+
 module Pagelime
   class Client
     
