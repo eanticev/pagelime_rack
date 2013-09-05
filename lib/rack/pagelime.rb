@@ -1,7 +1,7 @@
-# shrimp.rb
-require 'pagelime'
 require 'rack'
 require 'rack/utils'
+
+require_relative '../pagelime'
 
 module Rack
   class Pagelime

@@ -1,8 +1,6 @@
-require "nokogiri"
-require "base64"
-require "net/http"
-
 require_relative 'pagelime/configuration'
+require_relative 'pagelime/client'
+require_relative 'pagelime/html_processor'
 
 module Pagelime
   module ClassMethods
