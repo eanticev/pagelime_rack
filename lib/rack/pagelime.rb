@@ -7,9 +7,9 @@ module Rack
   class Pagelime
     include Rack::Utils
 
-    def initialize(app, opts = {})
-      @app = app
-      @opts = opts
+    def initialize(app, options = {})
+      @app      = app
+      @options  = options
       
       ::Pagelime.logger.debug  "PAGELIME: Rack Plugin Initialized"
     end 
@@ -24,8 +24,8 @@ module Rack
 
       if status == 200 && headers["content-type"].include?("text/html")
           
-        body_content = ""
-        response.each{|part| body_content += part}
+        body_content = StringIO.new
+        response.each{|part| body_content << part}
     
         req = Rack::Request.new(env)
 
