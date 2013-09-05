@@ -4,21 +4,27 @@ require "net/http"
 module Pagelime
   class S3Client
     
+    module ClassMethods
+      def default_format
+        :xml
+      end
+    end
+    
+    extend ClassMethods
+    
     attr_reader :account_key, :account_secret, :api_version
-    attr_reader :default_format
     
     def initialize(account_key, account_secret, api_version)
       # reference config object to ensure we have the latest credentials, etc
       @account_key    = account_key
       @account_secret = account_secret
       @api_version    = api_version
-      @default_format = :xml
       
       #raise "WARNING: Account key, secret, and API version were not specified!" unless configured?
     end
     
     def configured?
-      !(account_key.nil? || account_secret.nil? || api_version.nil?)
+      !(account_key.nil?)# || account_secret.nil? || api_version.nil?)
     end
     
     # def cms_api_signature(req)
@@ -27,7 +33,7 @@ module Pagelime
       # return signature
     # end
     
-    def fetch_shared(format = default_format)
+    def fetch_shared(format = self.class.default_format)
     
       # TODO: check cache (see the rails plugin for info)
     
@@ -40,7 +46,7 @@ module Pagelime
       content
     end
     
-    def fetch(page_path, format = default_format)
+    def fetch(page_path, format = self.class.default_format)
       
       # TODO: Should element_ids be used anywhere?
       
@@ -54,6 +60,14 @@ module Pagelime
       content = request_content("/cms_assets/heroku/#{account_key}/pages#{page_path}.#{format}")
       
       content
+    end
+    
+    def clear(page_path, format = self.class.default_format)
+      Pagelime.logger.warn "#{self.class.name}##{__method__} is not implemented!"
+    end
+    
+    def clear_shared(format = self.class.default_format)
+      Pagelime.logger.warn "#{self.class.name}##{__method__} is not implemented!"
     end
     
     private
