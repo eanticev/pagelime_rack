@@ -94,7 +94,7 @@ Sinatra Sample
     
     get '/page/about' do
       content_type "text/html"
-      return "<div id=\"content\" class=\"cms-editable\">Hello World!</div>"
+      return '<div id="content" class="cms-editable">Hello World!</div>'
     end
 
 Copyright (c) 2013 Pagelime LLC, released under the MIT license
