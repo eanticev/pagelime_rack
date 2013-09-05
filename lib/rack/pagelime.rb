@@ -9,21 +9,18 @@ module Rack
 
     def initialize(app, opts = {})
       @app = app
-      @opts = {
-        :log => false
-      }
-      @opts.merge! opts
+      @opts = opts
       
-      log "PAGELIME: Rack Plugin Initialized"
+      ::Pagelime.logger.debug  "PAGELIME: Rack Plugin Initialized"
     end 
 
     def call(env)
 
       status, headers, response = @app.call(env)
 
-      log "PAGELIME: Headers: #{headers}"
-      log "PAGELIME: Status: #{status}"
-      log "PAGELIME: Response: #{response}"
+      ::Pagelime.logger.debug  "PAGELIME: Headers: #{headers}"
+      ::Pagelime.logger.debug  "PAGELIME: Status: #{status}"
+      ::Pagelime.logger.debug  "PAGELIME: Response: #{response}"
 
       if status == 200 && headers["content-type"].include?("text/html")
           
@@ -32,33 +29,25 @@ module Rack
     
         req = Rack::Request.new(env)
 
-        log "PAGELIME: Processing For Path: #{req.path}"
-        log "PAGELIME: Processing Body (size:#{body_content.length})"
+        ::Pagelime.logger.debug  "PAGELIME: Processing For Path: #{req.path}"
+        ::Pagelime.logger.debug  "PAGELIME: Processing Body (size:#{body_content.length})"
       
-        body = cms_process_html_block(:page_path => req.path, :html => body_content, :fragment => false)
+        body = ::Pagelime.html_processor.process_document(body_content, req.path)
 
         headers['content-length'] = body.length.to_s
 
-        return [status,headers,[body]]
+        return [status, headers, [body]]
 
       else
 
-        log "PAGELIME: Not touching this request"
+        ::Pagelime.logger.debug  "PAGELIME: Not touching this request"
 
-        return [status,headers,response]
+        return [status, headers, response]
 
       end
 
     end
     
-    private
-    
-    def log(*values)
-      if @opts[:log] == "verbose"
-        puts(*values)
-      end
-    end
-
   end
 
 end
