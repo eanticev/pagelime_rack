@@ -43,16 +43,17 @@ Make sure that the "Integration Method" for your site on the advanced tab is set
 
 Set up your Environment variables: *(Skip if using Heroku add-on)*
 
-    ENV['PAGELIME_ACCOUNT_KEY'] = "..."
-    ENV['PAGELIME_ACCOUNT_SECRET'] = "..."
+    ENV['PAGELIME_ACCOUNT_KEY']      = "..."
+    ENV['PAGELIME_ACCOUNT_SECRET']   = "..."
     ENV['PAGELIME_RACK_API_VERSION'] = "1.0"
 
-Alternatively, configure them explicitly:
+Optionally, enable caching:
 
     Pagelime.configure do |config|
-      config.account_key = "..."
-      config.account_secret = "..."
-      config.api_version = "1.0"
+      # object that responds to `fetch` and `delete`
+      config.cache = ...
+      # options passed to `fetch(key, options = {}, &block)`
+      config.cache_fetch_options = { ... }
     end
 
 ### Step 4: Make pages editable
@@ -85,8 +86,8 @@ Sinatra Sample
     require 'pagelime-rack'
     
     configure :development do
-      ENV['PAGELIME_ACCOUNT_KEY'] = "..."
-      ENV['PAGELIME_ACCOUNT_SECRET'] = "..."
+      ENV['PAGELIME_ACCOUNT_KEY']      = "..."
+      ENV['PAGELIME_ACCOUNT_SECRET']   = "..."
       ENV['PAGELIME_RACK_API_VERSION'] = "1.0"
     end
     

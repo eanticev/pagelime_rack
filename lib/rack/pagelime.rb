@@ -32,7 +32,7 @@ module Rack
         ::Pagelime.logger.debug  "PAGELIME CMS RACK PLUGIN: Processing For Path: #{req.path}"
         ::Pagelime.logger.debug  "PAGELIME CMS RACK PLUGIN: Processing Body (size:#{body_content.length})"
       
-        body = ::Pagelime.html_processor.process_document(body_content, req.path)
+        body = ::Pagelime.process_page(body_content, req.path)
 
         headers['content-length'] = body.length.to_s
 
