@@ -5,7 +5,7 @@
 
 Gem::Specification.new do |s|
   s.name = "pagelime-rack"
-  s.version = "0.2.3"
+  s.version = "0.3.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Emil Anticevic", "Joel Van Horn"]
@@ -26,8 +26,11 @@ Gem::Specification.new do |s|
     "VERSION",
     "lib/pagelime-rack.rb",
     "lib/pagelime.rb",
+    "lib/pagelime/cache_engine.rb",
     "lib/pagelime/clients/xml_processor.rb",
+    "lib/pagelime/clients/xml_s3_storage.rb",
     "lib/pagelime/configuration.rb",
+    "lib/pagelime/storage_engine.rb",
     "lib/rack/pagelime.rb",
     "pagelime-rack.gemspec",
     "test/helper.rb",
