@@ -7,51 +7,71 @@ module Rack
   class Pagelime
     include Rack::Utils
     
-    TOGGLE_PROCESSING_ENV_KEY = "pagelime.toggle_processing"
-    ROUTE_RESPONSES = {
-      "index"                   => "working",
-      "after_publish_callback"  => "cache cleared"
+    ENV_KEYS = {
+      :toggle_processing => "pagelime.toggle_processing"
     }
     
     module ClassMethods
-      def enable_processing_for_request(env)
-        env[TOGGLE_PROCESSING_ENV_KEY] = "on"
+      def enable_processing_for_request(req)
+        req.env[ENV_KEYS[:toggle_processing]] = "on"
       end
       
-      def disable_processing_for_request(env)
-        env[TOGGLE_PROCESSING_ENV_KEY] = "off"
+      def disable_processing_for_request(req)
+        req.env[ENV_KEYS[:toggle_processing]] = "off"
       end
       
-      def processing_enabled_for_request?(env)
+      def processing_enabled_for_request?(req)
         config_option = ::Pagelime.config.toggle_processing
-        config_option = env[TOGGLE_PROCESSING_ENV_KEY] if config_option == "per_request"
+        config_option = req.env[ENV_KEYS[:toggle_processing]] if config_option == "per_request"
         
-        ::Pagelime.logger.debug  "PAGELIME CMS RACK PLUGIN: Procesing enabled for request? (config: #{::Pagelime.config.toggle_processing}, env: #{env[TOGGLE_PROCESSING_ENV_KEY]}, evaluated as: #{config_option})"
+        ::Pagelime.logger.debug  "PAGELIME CMS RACK PLUGIN: Procesing enabled for request? (config: #{::Pagelime.config.toggle_processing}, env: #{req.env[ENV_KEYS[:toggle_processing]]}, evaluated as: #{config_option})"
         
         return config_option == "on"
       end
       
       # responses
       
-      def handle_publish_callback(env)
+      def handle_route(req)
+        if req.get?
+          path    = req.path.gsub(/\A\/+|\/+\Z/, "")
+          prefix  = ::Pagelime.config.url_path.gsub(/\A\/+|\/+\Z/, "")
+          action  = path["#{prefix}/".size..-1].to_s
+          
+          # hijack response if a pagelime route, otherwise process output if so required
+          if path.start_with?("#{prefix}/") || path == prefix
+            case action
+            # handle publish callback
+            when "after_publish_callback"
+              resp = handle_publish_callback(req)
+            # handle "index"
+            when ""
+              resp = handle_status_check(req)
+            else
+              ::Pagelime.logger.debug  "PAGELIME CMS RACK PLUGIN: Unable to route action! (URL prefix: #{::Pagelime.config.url_path}, Request path: #{req.path})"
+            end
+          else
+            ::Pagelime.logger.debug  "PAGELIME CMS RACK PLUGIN: Unable to route prefix! (URL prefix: #{::Pagelime.config.url_path}, Request path: #{req.path})"
+          end
+        end
         
-        req = Rack::Request.new(env)
-  
+        resp
+      end
+      
+      def handle_publish_callback(req)
+        
         ::Pagelime.logger.debug  "PAGELIME CMS RACK PLUGIN: Route for publish callback called!"
         
         ::Pagelime.cache.clear_page(req.params["path"].to_s)
         ::Pagelime.cache.clear_shared
         
-        [200, {"Content-Type" => "text/html"}, StringIO.new(ROUTE_RESPONSES["after_publish_callback"])]
+        [200, {"Content-Type" => "text/html"}, ["cache cleared"]]
       end
       
-      def handle_status_check(env)
+      def handle_status_check(req)
         
-        req = Rack::Request.new(env)
-  
         ::Pagelime.logger.debug  "PAGELIME CMS RACK PLUGIN: Route for index called!"
         
-        [200, {"Content-Type" => "text/html"}, StringIO.new(ROUTE_RESPONSES["index"])]
+        [200, {"Content-Type" => "text/html"}, ["working"]]
       end
       
     end
@@ -67,40 +87,20 @@ module Rack
 
     def call(env)
       
-      status, headers, response = @app.call(env)
-
-      req     = Rack::Request.new(env)
-      path    = req.path.gsub(/\A\/+|\/+\Z/, "")
-      prefix  = ::Pagelime.config.url_path.gsub(/\A\/+|\/+\Z/, "")
-      action  = path["#{prefix}/".size..-1].to_s
-      
-      # hijack response if a pagelime route, otherwise process output if so required
-      if path.start_with?("#{prefix}/") || path == prefix
-        case action
-        # handle publish callback
-        when "after_publish_callback"
-          resp = handle_publish_callback(env)
-        # handle "index"
-        when ""
-          resp = handle_status_check(env)
-        else
-          ::Pagelime.logger.debug  "PAGELIME CMS RACK PLUGIN: Unable to route action! (URL prefix: #{::Pagelime.config.url_path}, Request path: #{req.path})"
-        end
-      else
-        ::Pagelime.logger.debug  "PAGELIME CMS RACK PLUGIN: Unable to route prefix! (URL prefix: #{::Pagelime.config.url_path}, Request path: #{req.path})"
-      end
+      app_resp  = @app.call(env)
+      req       = Rack::Request.new(env)
+      resp      = handle_route(req)
       
       # only process original output if routing wasn't handled
       unless resp
+        
+        status, headers, response = app_resp
       
         ::Pagelime.logger.debug  "PAGELIME CMS RACK PLUGIN: Headers: #{headers}"
         ::Pagelime.logger.debug  "PAGELIME CMS RACK PLUGIN: Status: #{status.inspect}"
         ::Pagelime.logger.debug  "PAGELIME CMS RACK PLUGIN: Response: #{response}"
         
-        ::Pagelime.logger.debug "enabled? (#{processing_enabled_for_request?(env)}) status (#{status == 200}) headers (#{headers["Content-Type"] != nil}) html (#{headers["Content-Type"]}) class (#{headers["Content-Type"].class})"
-        
-        if processing_enabled_for_request?(env) && status == 200 && 
-           headers["Content-Type"] != nil && headers["Content-Type"].include?("text/html")
+        if status == 200 && headers["Content-Type"].to_s.include?("text/html") && processing_enabled_for_request?(req)
             
           html = ""
           response.each{|part| html << part}
