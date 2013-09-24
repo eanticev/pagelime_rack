@@ -8,6 +8,10 @@ module Rack
     include Rack::Utils
     
     TOGGLE_PROCESSING_ENV_KEY = "pagelime.toggle_processing"
+    ROUTE_RESPONSES = {
+      "index"                   => "working",
+      "after_publish_callback"  => "cache cleared"
+    }
     
     module ClassMethods
       def enable_processing_for_request(env)
@@ -26,6 +30,30 @@ module Rack
         
         return config_option == "on"
       end
+      
+      # responses
+      
+      def handle_publish_callback(env)
+        
+        req = Rack::Request.new(env)
+  
+        ::Pagelime.logger.debug  "PAGELIME CMS RACK PLUGIN: Route for publish callback called!"
+        
+        ::Pagelime.cache.clear_page(req.params["path"].to_s)
+        ::Pagelime.cache.clear_shared
+        
+        [200, {"Content-Type" => "text/html"}, StringIO.new(ROUTE_RESPONSES["after_publish_callback"])]
+      end
+      
+      def handle_status_check(env)
+        
+        req = Rack::Request.new(env)
+  
+        ::Pagelime.logger.debug  "PAGELIME CMS RACK PLUGIN: Route for index called!"
+        
+        [200, {"Content-Type" => "text/html"}, StringIO.new(ROUTE_RESPONSES["index"])]
+      end
+      
     end
     
     include ClassMethods
@@ -51,10 +79,10 @@ module Rack
         case action
         # handle publish callback
         when "after_publish_callback"
-          resp = handle_publish_callback(status, headers, response, env)
+          resp = handle_publish_callback(status, headers, response, env, "after_publish_callback")
         # handle "index"
         when ""
-          resp = handle_status_check(status, headers, response, env)
+          resp = handle_status_check(status, headers, response, env, "index")
         else
           ::Pagelime.logger.debug  "PAGELIME CMS RACK PLUGIN: Unable to route action! (URL prefix: #{::Pagelime.config.url_path}, Request path: #{req.path})"
         end
@@ -63,69 +91,40 @@ module Rack
       end
       
       # only process original output if routing wasn't handled
-      resp ||= handle_html_processing(status, headers, response, env)
+      unless resp
       
-      resp
-    end
-    
-    # responses
-    
-    def handle_publish_callback(status, headers, response, env)
-      
-      req = Rack::Request.new(env)
-
-      ::Pagelime.logger.debug  "PAGELIME CMS RACK PLUGIN: Route for publish callback called!"
-      
-      ::Pagelime.cache.clear_page(req.params["path"].to_s)
-      ::Pagelime.cache.clear_shared
-      
-      [200, {"Content-Type" => "text/html"}, ["cache cleared"]]
-    end
-    
-    def handle_status_check(status, headers, response, env)
-      
-      req = Rack::Request.new(env)
-
-      ::Pagelime.logger.debug  "PAGELIME CMS RACK PLUGIN: Route for index called!"
-      
-      [200, {"Content-Type" => "text/html"}, ["working"]]
-    end
-    
-    def handle_html_processing(status, headers, response, env)
-      
-      req = Rack::Request.new(env)
-
-      status, headers, response = @app.call(env)
-
-      ::Pagelime.logger.debug  "PAGELIME CMS RACK PLUGIN: Headers: #{headers}"
-      ::Pagelime.logger.debug  "PAGELIME CMS RACK PLUGIN: Status: #{status}"
-      ::Pagelime.logger.debug  "PAGELIME CMS RACK PLUGIN: Response: #{response}"
-      
-      if processing_enabled_for_request?(env) && status == 200 && 
-         headers["content-type"] && headers["content-type"].include?("text/html")
-          
-        body_content = StringIO.new(response)
-        #response.each{|part| body_content << part}
+        ::Pagelime.logger.debug  "PAGELIME CMS RACK PLUGIN: Headers: #{headers}"
+        ::Pagelime.logger.debug  "PAGELIME CMS RACK PLUGIN: Status: #{status}"
+        ::Pagelime.logger.debug  "PAGELIME CMS RACK PLUGIN: Response: #{response}"
         
-        ::Pagelime.logger.debug  "PAGELIME CMS RACK PLUGIN: Processing For Path: #{req.path}"
-        ::Pagelime.logger.debug  "PAGELIME CMS RACK PLUGIN: Processing Body (size:#{body_content.length})"
-      
-        body = ::Pagelime.process_page(body_content, req.path)
-
-        headers['content-length'] = body.length.to_s
-
-        body = [body]
-
-      else
-
-        ::Pagelime.logger.debug  "PAGELIME CMS RACK PLUGIN: Not touching this request"
-
-        body = response
-
+        if processing_enabled_for_request?(env) && status == 200 && 
+           headers["content-type"] && headers["content-type"].include?("text/html")
+            
+          body_content = StringIO.new(response)
+          #response.each{|part| body_content << part}
+          
+          ::Pagelime.logger.debug  "PAGELIME CMS RACK PLUGIN: Processing For Path: #{req.path}"
+          ::Pagelime.logger.debug  "PAGELIME CMS RACK PLUGIN: Processing Body (size:#{body_content.length})"
+        
+          body = ::Pagelime.process_page(body_content, req.path)
+  
+          headers['content-length'] = body.length.to_s
+  
+          body = [body]
+          
+        else
+  
+          ::Pagelime.logger.debug  "PAGELIME CMS RACK PLUGIN: Not touching this request"
+  
+          body = response
+  
+        end
+        
+        resp = [status, headers, body]
+        
       end
       
-      [status, headers, body]
-      
+      resp
     end
     
   end
