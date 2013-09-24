@@ -94,23 +94,26 @@ module Rack
       unless resp
       
         ::Pagelime.logger.debug  "PAGELIME CMS RACK PLUGIN: Headers: #{headers}"
-        ::Pagelime.logger.debug  "PAGELIME CMS RACK PLUGIN: Status: #{status}"
+        ::Pagelime.logger.debug  "PAGELIME CMS RACK PLUGIN: Status: #{status.inspect}"
         ::Pagelime.logger.debug  "PAGELIME CMS RACK PLUGIN: Response: #{response}"
         
-        if processing_enabled_for_request?(env) && status == 200 && 
-           headers["content-type"] && headers["content-type"].include?("text/html")
-            
-          body_content = StringIO.new(response)
-          #response.each{|part| body_content << part}
-          
-          ::Pagelime.logger.debug  "PAGELIME CMS RACK PLUGIN: Processing For Path: #{req.path}"
-          ::Pagelime.logger.debug  "PAGELIME CMS RACK PLUGIN: Processing Body (size:#{body_content.length})"
+        ::Pagelime.logger.debug "enabled? (#{processing_enabled_for_request?(env)}) status (#{status == 200}) headers (#{headers["Content-Type"] != nil}) html (#{headers["Content-Type"]}) class (#{headers["Content-Type"].class})"
         
-          body = ::Pagelime.process_page(body_content, req.path)
+        if processing_enabled_for_request?(env) && status == 200 && 
+           headers["Content-Type"] != nil && headers["Content-Type"].include?("text/html")
+            
+          html = ""
+          response.each{|part| html << part}
+          
+          ::Pagelime.logger.debug "PAGELIME CMS RACK PLUGIN: Processing For Path: #{req.path}"
+          ::Pagelime.logger.debug "PAGELIME CMS RACK PLUGIN: Processing Body (size:#{html.length})"
+          ::Pagelime.logger.debug "PAGELIME CMS RACK PLUGIN: Processing Body: #{html.inspect}"
+        
+          html = ::Pagelime.process_page(html, req.path)
   
-          headers['content-length'] = body.length.to_s
+          headers['content-length'] = html.length.to_s
   
-          body = [body]
+          body = [html]
           
         else
   
