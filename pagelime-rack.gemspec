@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = "pagelime-rack"
-  s.version = "0.3.0"
+  s.version = "0.4.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Emil Anticevic", "Joel Van Horn"]
-  s.date = "2013-09-11"
+  s.date = "2013-09-24"
   s.description = "The Pagelime Rack Middleware will process outgoing HTML, look for editable areas, and replace the content with the appropriate HTML from the Pagelime CDN and cache it in memory if possible."
   s.email = "emil@pagelime.com"
   s.extra_rdoc_files = [
@@ -24,6 +24,7 @@ Gem::Specification.new do |s|
     "README.md",
     "Rakefile",
     "VERSION",
+    "config.ru",
     "lib/pagelime-rack.rb",
     "lib/pagelime.rb",
     "lib/pagelime/cache_engine.rb",
