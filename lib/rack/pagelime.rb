@@ -79,10 +79,10 @@ module Rack
         case action
         # handle publish callback
         when "after_publish_callback"
-          resp = handle_publish_callback(status, headers, response, env, "after_publish_callback")
+          resp = handle_publish_callback(env)
         # handle "index"
         when ""
-          resp = handle_status_check(status, headers, response, env, "index")
+          resp = handle_status_check(env)
         else
           ::Pagelime.logger.debug  "PAGELIME CMS RACK PLUGIN: Unable to route action! (URL prefix: #{::Pagelime.config.url_path}, Request path: #{req.path})"
         end
