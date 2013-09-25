@@ -81,15 +81,17 @@ If you have a standalone Pagelime account, simply go to [pagelime.com](http://pa
 
 Sinatra Sample
 --------------
-
+    
+    # Set the environment variables BEFORE requiring the pagelime-rack gem
+    
+    ENV['PAGELIME_ACCOUNT_KEY']      = "..."
+    ENV['PAGELIME_ACCOUNT_SECRET']   = "..."
+    ENV['PAGELIME_RACK_API_VERSION'] = "1.0"
+    
+    # Setup Sinatra app
+    
     require 'sinatra'
     require 'pagelime-rack'
-    
-    configure :development do
-      ENV['PAGELIME_ACCOUNT_KEY']      = "..."
-      ENV['PAGELIME_ACCOUNT_SECRET']   = "..."
-      ENV['PAGELIME_RACK_API_VERSION'] = "1.0"
-    end
     
     use Rack::Pagelime
     
