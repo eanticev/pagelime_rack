@@ -4,6 +4,9 @@ module Pagelime
   module Clients
     class XmlProcessor
       
+      EDITABLE_REGION_CSS_SELECTOR = ".cms-editable"
+      SHARED_REGION_CSS_SELECTOR   = ".cms-shared"
+      
       def process_document(storage, html, page_path = false)
         Pagelime.logger.debug "PAGELIME CMS RACK PLUGIN: Document HTML: #{html.inspect}"
         
@@ -50,8 +53,8 @@ module Pagelime
         end
       
         # use nokogiri to replace contents
-        editable_regions  = doc.css(".cms-editable")
-        shared_regions    = doc.css(".cms-shared")
+        editable_regions  = doc.css(EDITABLE_REGION_CSS_SELECTOR)
+        shared_regions    = doc.css(SHARED_REGION_CSS_SELECTOR)
         
         patch_regions editable_regions, editable_content
         patch_regions shared_regions, shared_content
