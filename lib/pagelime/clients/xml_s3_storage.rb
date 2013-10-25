@@ -23,6 +23,15 @@ module Pagelime
         
         content
       end
+
+      def fetch_include(region_id)
+        Pagelime.logger.debug "PAGELIME CMS RACK PLUGIN: NO INCLUDE #{region_id} CACHE... loading XML"
+
+        content = request_content("/cms_assets/heroku/#{@options[:account_key]}/includes/#{region_id}.xml")
+
+        Pagelime.logger.debug "PAGELIME CMS RACK PLUGIN: include #{region_id} content: #{content.inspect}"
+
+      end
       
       def fetch_path(page_path)
         

@@ -6,6 +6,7 @@ module Pagelime
       
       EDITABLE_REGION_CSS_SELECTOR = ".cms-editable"
       SHARED_REGION_CSS_SELECTOR   = ".cms-shared"
+      INCLUDE_REGION_CSS_SELECTOR  = ".cms-include"
       
       def process_document(storage, html, page_path = false)
         Pagelime.logger.debug "PAGELIME CMS RACK PLUGIN: Document HTML: #{html.inspect}"
@@ -55,9 +56,21 @@ module Pagelime
         # use nokogiri to replace contents
         editable_regions  = doc.css(EDITABLE_REGION_CSS_SELECTOR)
         shared_regions    = doc.css(SHARED_REGION_CSS_SELECTOR)
+        include_regions   = doc.css(INCLUDE_REGION_CSS_SELECTOR)
+
+        include_content = nil
+        for include_region in include_regions
+          include_content += storage.fetch_include(include_region["id"])
+        end
+
+        unless include_content
+          ::Pagelime.logger.warn "PAGELIME CMS RACK PLUGIN: Include content not returned from storage"
+          return nil
+        end
         
         patch_regions editable_regions, editable_content
         patch_regions shared_regions, shared_content
+        patch_regions include_regions, include_content
           
         doc.to_html
       end
