@@ -24,7 +24,7 @@ module Rack
         config_option = ::Pagelime.config.toggle_processing
         config_option = req.env[ENV_KEYS[:toggle_processing]] if config_option == "per_request"
         
-        ::Pagelime.logger.debug  "PAGELIME CMS RACK PLUGIN: Procesing enabled for request? (config: #{::Pagelime.config.toggle_processing}, env: #{req.env[ENV_KEYS[:toggle_processing]]}, evaluated as: #{config_option})"
+        ::Pagelime.logger.debug  "PAGELIME CMS RACK PLUGIN: Processing enabled for request? (config: #{::Pagelime.config.toggle_processing}, env: #{req.env[ENV_KEYS[:toggle_processing]]}, evaluated as: #{config_option})"
         
         return config_option == "on"
       end
@@ -50,7 +50,7 @@ module Rack
               ::Pagelime.logger.debug  "PAGELIME CMS RACK PLUGIN: Unable to route action! (URL prefix: #{::Pagelime.config.url_path}, Request path: #{req.path})"
             end
           else
-            ::Pagelime.logger.debug  "PAGELIME CMS RACK PLUGIN: Unable to route prefix! (URL prefix: #{::Pagelime.config.url_path}, Request path: #{req.path})"
+            ::Pagelime.logger.debug  "PAGELIME CMS RACK PLUGIN: No special routing... (URL prefix: #{::Pagelime.config.url_path}, Request path: #{req.path})"
           end
         end
         
